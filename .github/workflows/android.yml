@@ -2,12 +2,13 @@ name: Android Build (APK + AAB)
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -19,10 +20,27 @@ jobs:
           java-version: 17
           cache: gradle
 
-      - name: Ensure Gradle wrapper is executable
+      # 🔎 DEBUG: in ra cấu trúc repo để biết bạn đang thiếu gì / sai folder nào
+      - name: Debug repo structure
         run: |
+          echo "===== ROOT FILES ====="
           ls -la
-          chmod +x ./gradlew
+          echo "===== FIND gradlew ====="
+          find . -maxdepth 4 -name "gradlew" -print
+          echo "===== FIND settings.gradle(.kts) ====="
+          find . -maxdepth 4 -name "settings.gradle*" -print
+          echo "===== FIND app/build.gradle(.kts) ====="
+          find . -maxdepth 6 -path "*/app/build.gradle*" -print
+
+      # ✅ Nếu gradlew nằm đúng root thì chmod OK
+      # ✅ Nếu bạn lỡ để project trong subfolder, bước này sẽ fail -> nhìn log là biết ngay
+      - name: Make gradlew executable
+        run: chmod +x ./gradlew
+
+      - name: Gradle sanity check
+        run: |
+          ./gradlew --version
+          ./gradlew :app:tasks --all --no-daemon
 
       - name: Build Debug APK
         run: ./gradlew :app:assembleDebug --no-daemon
