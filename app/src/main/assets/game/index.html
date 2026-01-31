@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover" />
+  <title>ANGER OF STICK: ZOMBIE — Offline</title>
+  <style>
+    html,body{margin:0;height:100%;background:#050612;overflow:hidden;touch-action:none}
+    #wrap{position:fixed;inset:0}
+    canvas{width:100vw;height:100vh;display:block}
+    #hud{position:fixed;inset:0;pointer-events:none;font-family:system-ui,Segoe UI,Roboto,Arial}
+    .top{position:fixed;left:10px;top:10px;right:10px;display:flex;gap:10px;align-items:center;justify-content:space-between}
+    .pill{background:rgba(0,0,0,.45);border:1px solid rgba(255,255,255,.15);backdrop-filter: blur(6px);
+      border-radius:999px;padding:8px 12px;color:#e7eefc;font-size:13px}
+    .btnrow{position:fixed;bottom:12px;left:12px;right:12px;display:flex;gap:10px;justify-content:center;pointer-events:auto}
+    button{border:0;border-radius:14px;padding:12px 16px;font-weight:700;color:#0b0c14;background:#ffd24d;box-shadow:0 10px 30px rgba(0,0,0,.45)}
+    button.secondary{background:#7c7cff;color:white}
+    button.danger{background:#ff6b7a;color:white}
+    #toast{position:fixed;left:50%;transform:translateX(-50%);top:58px;max-width:92vw;text-align:center;display:none}
+    #toast .msg{display:inline-block;background:rgba(0,0,0,.55);border:1px solid rgba(255,255,255,.15);
+      padding:8px 12px;border-radius:12px;color:#fff;font-size:13px}
+  </style>
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="game"></canvas>
+  </div>
+
+  <div id="hud">
+    <div class="top">
+      <div class="pill" id="stat">HP 100 | Wave 1 | Kills 0</div>
+      <div class="pill" id="fps">FPS --</div>
+    </div>
+    <div id="toast"><div class="msg" id="toastMsg"></div></div>
+
+    <div class="btnrow">
+      <button id="startBtn">Start</button>
+      <button class="secondary" id="skillBtn">Skill</button>
+      <button class="danger" id="pauseBtn">Pause</button>
+    </div>
+  </div>
+
+  <script src="./engine.js"></script>
+  <script src="./main.js"></script>
+
+  <!-- MENU PANEL -->
+  <div id="menuPanel" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:auto;background:rgba(0,0,0,.55)">
+    <div style="width:min(560px,92vw);background:rgba(10,10,18,.82);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:14px 14px 16px;box-shadow:0 20px 60px rgba(0,0,0,.55)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div style="color:#ffd24d;font-weight:900;font-size:18px">ANGER OF STICK: ZOMBIE</div>
+        <div style="color:rgba(255,255,255,.75);font-size:12px" id="saveInfo">Save: --</div>
+      </div>
+      <div style="margin-top:10px;color:rgba(255,255,255,.85);font-weight:700">Chọn Map</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+        <button class="secondary" id="mapCityBtn" style="flex:1">City</button>
+        <button class="secondary" id="mapNightBtn" style="flex:1">Night</button>
+        <button class="secondary" id="mapRuinsBtn" style="flex:1">Ruins</button>
+        <button class="secondary" id="mapToxicBtn" style="flex:1">Toxic</button>
+      </div>
+
+
+      <div style="margin-top:12px;color:rgba(255,255,255,.85);font-weight:700">Chọn Skin</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+        <button class="secondary" id="skinRedBtn" style="flex:1">Red</button>
+        <button class="secondary" id="skinGreenBtn" style="flex:1">Green</button>
+        <button class="secondary" id="skinGoldBtn" style="flex:1">Gold</button>
+        <button class="secondary" id="skinDefaultBtn" style="flex:1">Default</button>
+      </div>
+
+      <div style="margin-top:12px;color:rgba(255,255,255,.85);font-weight:700">Chế độ</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:10px">
+        <button id="newGameBtn" style="flex:1">New Game</button>
+        <button class="secondary" id="continueBtn" style="flex:1">Continue</button>
+      </div>
+
+      <div style="margin-top:10px;display:flex;gap:10px;flex-wrap:wrap">
+        <button class="secondary" id="openShopBtn" style="flex:1">Shop</button>
+        <button class="danger" id="resetSaveBtn" style="flex:1">Reset Save</button>
+      </div>
+
+      <div style="margin-top:10px;color:rgba(255,255,255,.65);font-size:12px;line-height:1.35">
+        Tap để đánh • Double tap để Skill • Joystick bên trái để di chuyển • Có Boss mỗi 5 wave
+      </div>
+    </div>
+  </div>
+
+  <!-- SHOP PANEL -->
+  <div id="shopPanel" style="position:fixed;inset:0;display:none;align-items:center;justify-content:center;pointer-events:auto;background:rgba(0,0,0,.55)">
+    <div style="width:min(640px,94vw);background:rgba(10,10,18,.88);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:14px 14px 16px;box-shadow:0 20px 60px rgba(0,0,0,.55)">
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+        <div style="color:#7c7cff;font-weight:900;font-size:18px">SHOP</div>
+        <div style="color:rgba(255,255,255,.85);font-weight:800" id="shopCoins">Coins: 0</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px">
+        <button class="secondary" id="upDmgBtn"><img src="./ico_dmg.png" style="width:22px;height:22px;vertical-align:-5px;margin-right:8px">Damage +1 (Cost <span id="costDmg">10</span>)</button>
+        <button class="secondary" id="upHpBtn"><img src="./ico_hp.png" style="width:22px;height:22px;vertical-align:-5px;margin-right:8px">Max HP +10 (Cost <span id="costHp">12</span>)</button>
+        <button class="secondary" id="upCritBtn"><img src="./ico_crit.png" style="width:22px;height:22px;vertical-align:-5px;margin-right:8px">Crit +2% (Cost <span id="costCrit">15</span>)</button>
+        <button class="secondary" id="unlockGunBtn"><img src="./ico_gun.png" style="width:22px;height:22px;vertical-align:-5px;margin-right:8px">Unlock Gun (Cost <span id="costGun">80</span>)</button>
+        <button class="secondary" id="upFireBtn"><img src="./ico_fire.png" style="width:22px;height:22px;vertical-align:-5px;margin-right:8px">Fire Rate + (Cost <span id="costFire">25</span>)</button>
+        <button class="secondary" id="upRegenBtn"><img src="./ico_regen.png" style="width:22px;height:22px;vertical-align:-5px;margin-right:8px">Regen + (Cost <span id="costRegen">30</span>)</button>
+      </div>
+
+      <div style="margin-top:12px;display:flex;gap:10px">
+        <button class="secondary" id="closeShopBtn" style="flex:1">Back</button>
+      </div>
+
+      <div style="margin-top:10px;color:rgba(255,255,255,.65);font-size:12px;line-height:1.35">
+        Upgrade lưu bằng localStorage. Nếu mất tiếng, bấm Sound.
+      </div>
+    </div>
+  </div>
+
+
+</body>
+</html>
